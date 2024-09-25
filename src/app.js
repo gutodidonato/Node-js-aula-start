@@ -1,4 +1,16 @@
 import express from "express";
+import conectaBanco from "./config/dbConnect.js";
+
+const conexao = await conectaBanco();
+
+conexao.on("error", (erro)=>{
+    console.log(erro);
+})
+
+conexao.once("open", ()=>{
+    console.log("Conectado ao banco de dados");
+})
+
 
 const app = express();
 app.use(express.json());
@@ -37,12 +49,23 @@ app.get("/livro/:id", (req, res)=>{
 })
 
 app.put("/alterar_livro/:id", (req,res)=>{
-    const livro = livros.find(livro => 
+    const index = livros.findIndex(livro => 
                 livro.id === Number(req.params.id));
-    if (livro){
-        livros[Number(req.params.id)].titulo = req.body.titulo;
-        res.status(200).json(livro);
+    if (index !== -1){
+        livros[index].titulo = req.body.titulo;
+        res.status(200).json(livros[index]);
+    }
+})
+
+app.delete("/deletar_livro/:id", (req,res)=>{
+    const index = livros.findIndex(livro => 
+                    livro.id === Number(req.params.id))
+    if (index !== -1){
+        livros.splice(index, 1);
+        res.status(200).json(livros);
     }
 })
 
 export default app;
+
+
